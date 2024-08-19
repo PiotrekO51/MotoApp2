@@ -1,4 +1,5 @@
-﻿
+﻿using MotoApp2;
+using MotoApp2.Repositories;
 using System.Text.Json;
 namespace MotoApp2.Entities.Extensions;
 
@@ -10,4 +11,5 @@ public static class EntityExtensions
         return JsonSerializer.Deserialize<T>(json);
     }
 
+    
 }

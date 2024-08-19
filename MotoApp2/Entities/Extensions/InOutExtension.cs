@@ -1,17 +1,19 @@
-﻿
+﻿using MotoApp2.Repositories;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-using Microsoft.EntityFrameworkCore;
-using MotoApp2.Data.Repositories;
-using MotoApp2.Entities;
+namespace MotoApp2.Entities.Extensions;
 
-namespace MotoApp2.Repositories;
-
-public class FileRepository: Employee
+public class InOutExtension
 {
-    public void AddEmployeeTooFile(IReadRepository<Employee> employeeRepository)
+    public  void AddEmployeeTooFile(IReadRepository<IEntity> sqlRepository)
+
     {
         File.Delete("Employe_Data.txt");
-        var items = employeeRepository.GetAll();
+        var items = sqlRepository.GetAll();
         if (items != null)
             using (var writer = File.AppendText("Employe_Data.txt"))
                 foreach (var item in items)
@@ -23,7 +25,7 @@ public class FileRepository: Employee
         { Console.WriteLine("Nie poprawna wartość"); }
 
     }
-    public void AddFileToSqlRepository(IWriteRepository<Employee> employeeRepository)
+    public  void AddFileToSqlRepository(IWriteRepository<Employee> sqlRepository)
     {
         if (File.Exists("Employe_Data.txt"))
         {
@@ -36,12 +38,13 @@ public class FileRepository: Employee
                     int id2 = int.Parse(pole[0]);
                     string name = pole[1];
                     string surname = pole[2];
-                    employeeRepository.Add(new Employee { Id = id2,FirstName = name, SurName=surname});
+                    sqlRepository.Add(new Employee { Id = id2, FirstName = name, SurName = surname });
                     line = reader.ReadLine();
                 }
-                employeeRepository.Save();
+                sqlRepository.Save();
             }
         }
-        else { Console.WriteLine("Brak pliku");}
+        else { Console.WriteLine("Brak pliku"); }
     }
+
 }

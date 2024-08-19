@@ -1,8 +1,11 @@
 ﻿namespace MotoApp2;
+
+using Microsoft.EntityFrameworkCore;
 using MotoApp2.Data;
 using MotoApp2.Entities;
 using MotoApp2.Repositories;
 using MotoApp2.Repositories.Extension;
+using MotoApp2.Entities.Extensions;
 using System;
 using System.ComponentModel.Design;
 using System.Reflection.PortableExecutable;
@@ -12,9 +15,9 @@ internal class Program
     private static void Main()
     {
 
-        var fileRepository = new FileRepository();
+        var inOutFile = new InOutExtension();
         var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext());
-        fileRepository.AddFileToSqlRepository(employeeRepository);
+        inOutFile.AddFileToSqlRepository(employeeRepository);
 
         Console.WriteLine("╔════════════════════════════════════════════════════════╗");
         Console.WriteLine("║ Witam w programie rejestracji pracowników i managerów  ║");
@@ -71,7 +74,7 @@ internal class Program
             }
 
         }
-        fileRepository.AddEmployeeTooFile(employeeRepository);
+        inOutFile.AddEmployeeTooFile(employeeRepository);
         Console.WriteLine("\n\n Dziękujemy za skożystanie z aplikacji :) ");
         Thread.Sleep(4000);
         Console.Clear();
