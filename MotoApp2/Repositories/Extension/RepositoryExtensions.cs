@@ -10,7 +10,7 @@ public static class RepositoryExtensions
     {
         foreach (var emp in items)
         {
-            repository.Add(emp);
+            repository.Add(emp) ;
         }
         repository.Save();
     }

@@ -4,12 +4,18 @@ using MotoApp2.Entities;
 using MotoApp2.Repositories;
 using MotoApp2.Repositories.Extension;
 using System;
+using System.ComponentModel.Design;
+using System.Reflection.PortableExecutable;
 
 internal class Program
 {
     private static void Main()
     {
-        var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext(), EmployeeAded);
+
+        var fileRepository = new FileRepository();
+        var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext());
+        fileRepository.AddFileToSqlRepository(employeeRepository);
+
         Console.WriteLine("╔════════════════════════════════════════════════════════╗");
         Console.WriteLine("║ Witam w programie rejestracji pracowników i managerów  ║");
         Console.WriteLine("║  PROSZĘ POSTĘPOWAĆ ZGODNIE Z WYŚWIETLANYM MENU !!!!!   ║");
@@ -44,7 +50,7 @@ internal class Program
             switch (input2)
             {
                 case "1":
-
+                    
                     AddEmployeeToSql();
                     break;
 
@@ -65,6 +71,7 @@ internal class Program
             }
 
         }
+        fileRepository.AddEmployeeTooFile(employeeRepository);
         Console.WriteLine("\n\n Dziękujemy za skożystanie z aplikacji :) ");
         Thread.Sleep(4000);
         Console.Clear();
@@ -72,11 +79,13 @@ internal class Program
     private static void AddEmployeeToSql()
     {
 
+        var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext(), EmployeeAded);
+
         Console.Clear();
         bool ExitMenu2 = true;
         while (ExitMenu2)
         {
-            var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext(), EmployeeAded);
+
             // DODAWAIE PRACOWNIKÓW
             Console.Clear();
             WriteLineColor(ConsoleColor.Green);
@@ -96,7 +105,6 @@ internal class Program
             {
                 case "1":
                     EmployeeList(employeeRepository);
-                    Console.ReadLine();
                     break;
                 case "2":
                     AddEmployee();
@@ -115,7 +123,6 @@ internal class Program
             }
         }
 
-        Console.Clear();
     }
 
     static void EmployeeAded(object item)
@@ -167,12 +174,12 @@ internal class Program
             Console.Clear();
             string name2 = AddName("nazwisko Managera");
             Console.Clear();
-            var employees = new[] 
+            var employees = new[]
             {
             new Manager
             {FirstName = name, SurName = name2},
             };
-            employeeRepository.AddBach(employees);        
+            employeeRepository.AddBach(employees) ;
         }
     }
 
@@ -215,66 +222,77 @@ internal class Program
             }
         }
         Console.Clear();
-        var items = employeeRepository.GetAll();
-        int count = items.Count();
-        if (count > 0)
-        {
-            foreach (var item in items)
-            {
-                Console.WriteLine(item);
-            }
-        }
-        else { Console.WriteLine("katalog jest pusty"); }
-        Console.ReadLine();
-        Console.Clear();
     }
 
-    private static void UppDateEmoloyee()
+    static void UppDateEmoloyee()
     {
         var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext());
         EmployeeList(employeeRepository);
-        string id = AddName("Id");
-        if (int.TryParse(id, out int id2))
-        { 
-            var user = employeeRepository.GetById(id2);
-            Console.WriteLine(user);
-            while (true)
+        var count = employeeRepository.GetAll().Count();
+        if (count != 0)
+        {
+            Console.WriteLine();
+            string id = AddName("Id");
+            if (int.TryParse(id, out int id2))
             {
-                string name = AddName("Nowe imię Pracownika lub X aby wrócić do MENU");
-                if (name == "X")
-                { AddEmployeeToSql(); }
-                Console.Clear();
-                string name2 = AddName("Nowe nazwisko Pracownika");
-                Console.Clear();
-                user.FirstName = name;
-                employeeRepository.UpDateEmployee(user);
-                user.SurName = name2;
-                employeeRepository.UpDateEmployee(user);
-            }
-            EmployeeList(employeeRepository);
-            Console.ReadLine();
-        }
-        else { Console.WriteLine("nie poprawna wartość"); }
-    }
-    
-       
-    
+                var user = employeeRepository.GetById(id2);
+                Console.WriteLine(user);
+                while (true)
+                {
+                    string name = AddName("Nowe imię Pracownika lub X aby wrócić do MENU");
+                    if (name == "X")
+                    { AddEmployeeToSql(); }
+                    Console.Clear();
+                    string name2 = AddName("Nowe nazwisko Pracownika");
+                    Console.Clear();
+                    user.FirstName = name;
+                    employeeRepository.UpDateEmployee(user);
+                    user.SurName = name2;
+                    employeeRepository.UpDateEmployee(user);
+                    EmployeeList(employeeRepository);
+                    Console.ReadLine();
+                    break;
+                }
 
-    static void EmployeeList(IReadRepository<IEntity> employeeRepository)
+            }
+            else
+            {
+                Console.WriteLine("nie poprawna wartość");
+            }
+
+        }
+        else
+        {
+            AddEmployeeToSql();
+        }
+    }
+
+    static void EmployeeList(IReadRepository<Employee> employeeRepository)
     {
+        List<string> employees = new List<string>();
 
         var items = employeeRepository.GetAll();
         int count = items.Count();
-        if (count > 0)
+        if (count == 0)
+        {
+            Console.WriteLine("katalog jest pusty");
+            Console.ReadKey();
+        }
+        else
         {
             foreach (var item in items)
             {
-                Console.WriteLine(item);
+                Console.WriteLine(item.ToString2());
             }
         }
-        else { Console.WriteLine("katalog jest pusty"); }
-        //Console.ReadKey();
+            Console.ReadKey();
     }
+
+
+
+        
+
+    
 
     static void EmployeeRemove(object item)
     {
@@ -283,24 +301,29 @@ internal class Program
     }
     static void RemoveEmployee()
     {
-
         var employeeRepository = new SqlRepository<Employee>(new MotoApp2DbContext());
         EmployeeList(employeeRepository);
-        string numb = AddName($"Numer do usunięcia");
-        if (int.TryParse(numb, out int result)) ;
+        var count2 = employeeRepository.GetAll().Count();
+        if (count2 > 0)
         {
-            var items = employeeRepository.GetAll();
-            if (result > 0)
+            string numb = AddName($"Numer do usunięcia");
+            if (int.TryParse(numb, out int result)) ;
             {
-                employeeRepository.RemoveDevice(new Employee { Id = result }); ;
-                employeeRepository.Save();
-            }
-            else
-            {
-                WriteLineColor(ConsoleColor.Red);
-                Console.WriteLine("Wartość z poza zakresu długości listy");
+                var items = employeeRepository.GetAll();
+                if (result > 0)
+                {
+                    employeeRepository.RemoveDevice(new Employee { Id = result }); ;
+                    employeeRepository.Save();
+                }
+                else
+                {
+                    WriteLineColor(ConsoleColor.Red);
+                    Console.WriteLine("Wartość z poza zakresu długości listy");
+                }
             }
         }
+        else { AddEmployeeToSql(); }
+
         Console.ReadKey();
         Console.Clear();
     }
@@ -312,7 +335,7 @@ internal class Program
         int count = items.Count();
         for (int i = 1; i <= count; i++)
         {
-            employeeRepository.Remove(new Employee { Id = i}); ;
+            employeeRepository.Remove(new Employee { Id = i }); ;
             employeeRepository.Save();
         }
     }

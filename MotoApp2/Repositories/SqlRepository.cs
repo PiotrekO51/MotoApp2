@@ -32,6 +32,8 @@ public class SqlRepository<T> : IRepository<T> where T : class , IEntity,new()
 
     public void Add(T item )
     {
+        
+        
         _dbSet.Add(item );
         _itemAdedCallback?.Invoke( item );
         ItemAded?.Invoke(this, item);
